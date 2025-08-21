@@ -1,90 +1,151 @@
-import React from 'react';
-import { View, Text, Image, StyleSheet } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { View, Text, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
-import Icon from 'react-native-vector-icons/Ionicons';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import FontAwesome5 from 'react-native-vector-icons/FontAwesome5';
 
+import HomeIcon from '../Assets/icon/home.png';
+import CartIcon from '../Assets/icon/cart.png';
+import NotificationIcon from '../Assets/icon/bell.png';
+import TrackOrderIcon from '../Assets/icon/track.png';
+import ReferIcon from '../Assets/icon/refer.png';
+import ContactIcon from '../Assets/icon/phone.png';
+import AboutIcon from '../Assets/icon/about.png';
+import RateIcon from '../Assets/icon/star.png';
+import ShareIcon from '../Assets/icon/share.png';
+import FAQIcon from '../Assets/icon/FAQ.png';
+import TermsIcon from '../Assets/icon/terms.png';
+import PrivacyIcon from '../Assets/icon/privacy.png';
 const SlideBar = (props) => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const storedUser = await AsyncStorage.getItem('userData');
+        
+        if (storedUser) {
+          setUser(JSON.parse(storedUser));
+        }
+      } catch (e) {
+        console.error('Failed to load user', e);
+      }
+    };
+    loadUser();
+  }, []);
+
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <View style={styles.header}>
-   <FontAwesome5 name="user-circle" size={80} color="#fff" style={styles.logo} />
-        <Text style={styles.loginText}>Login ?</Text>
+        {user ? (
+          <View style={{ alignItems: 'center' }}>
+            <Image
+              source={require('../Assets/Images/logo.png')}
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            <Text style={styles.loginText}>{user.name || "User" }</Text>
+            <Text style={styles.phoneText}>{user.mobile || ''}</Text>
+          </View>
+        ) : (
+          <TouchableOpacity onPress={() => props.navigation.navigate('Login')}>
+            <Text style={styles.loginText}>Login ?</Text>
+          </TouchableOpacity>
+        )}
       </View>
 
       <View style={styles.drawerList}>
         <DrawerItem
-          icon={({ color, size }) => <Icon name="home-outline" color={color} size={size} />}
+          icon={() => <Image source={HomeIcon} style={{ width: 24, height: 24 }} />}
           label="Home"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => props.navigation.navigate('Home')}
         />
         <DrawerItem
-          icon={({ color, size }) => <FontAwesome5 name="shopping-cart" color={color} size={size} />}
+          icon={() => <Image source={CartIcon} style={{ width: 24, height: 24 }} />}
           label="Cart"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="notifications-outline" color={color} size={size} />}
+          icon={() => <Image source={NotificationIcon} style={{ width: 24, height: 24 }} />}
           label="Notifications"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
+          style={{ marginBottom: 10 }}
         />
         <DrawerItem
-          icon={({ color, size }) => <MaterialCommunityIcons name="truck-delivery-outline" color={color} size={size} />}
+          icon={() => <Image source={TrackOrderIcon} style={{ width: 24, height: 24 }} />}
           label="Track Order"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <MaterialCommunityIcons name="account-multiple-plus-outline" color={color} size={size} />}
+          icon={() => <Image source={ReferIcon} style={{ width: 24, height: 24 }} />}
           label="Refer & Earn"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
+          style={{ marginBottom: 10 }}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="call-outline" color={color} size={size} />}
+          icon={() => <Image source={ContactIcon} style={{ width: 24, height: 24 }} />}
           label="Contact Us"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="information-circle-outline" color={color} size={size} />}
+          icon={() => <Image source={AboutIcon} style={{ width: 24, height: 24 }} />}
           label="About Us"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="star-outline" color={color} size={size} />}
+          icon={() => <Image source={RateIcon} style={{ width: 24, height: 24 }} />}
           label="Rate Us"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="share-social-outline" color={color} size={size} />}
+          icon={() => <Image source={ShareIcon} style={{ width: 24, height: 24 }} />}
           label="Share App"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
+          style={{ marginBottom: 10 }}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="help-circle-outline" color={color} size={size} />}
+          icon={() => <Image source={FAQIcon} style={{ width: 24, height: 24 }} />}
           label="FAQ"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="document-text-outline" color={color} size={size} />}
+          icon={() => <Image source={TermsIcon} style={{ width: 24, height: 24 }} />}
           label="Terms & Conditions"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
         />
         <DrawerItem
-          icon={({ color, size }) => <Icon name="shield-checkmark-outline" color={color} size={size} />}
+          icon={() => <Image source={PrivacyIcon} style={{ width: 24, height: 24 }} />}
           label="Privacy Policy"
-          labelStyle={{ fontFamily: 'Poppins' }}
+          labelStyle={styles.textCommon}
           onPress={() => {}}
+        />
+        <DrawerItem
+          label="Logout"
+          labelStyle={styles.textCommon}
+          onPress={async () => {
+            await AsyncStorage.removeItem('userData');
+            props.navigation.replace('Login');
+          }}
+        />
+        <DrawerItem
+          label="Delete Account"
+          labelStyle={[styles.textCommon, { color: 'red' }]}
+          onPress={() => {
+            Alert.alert('Delete Account', 'Are you sure you want to delete your account?', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Yes', onPress: () => console.log('Delete account API call here') },
+            ]);
+          }}
         />
       </View>
     </DrawerContentScrollView>
@@ -103,6 +164,14 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     marginBottom: 10,
   },
+  textCommon: {
+    fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontSize: 12,
+    lineHeight: 12,
+    letterSpacing: 0,
+    textTransform: 'capitalize',
+  },
   loginText: {
     color: '#fff',
     fontSize: 18,
@@ -113,6 +182,12 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
     paddingTop: 10,
+  },
+  phoneText: {
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Poppins',
+    marginTop: 4,
   },
 });
 

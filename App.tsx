@@ -16,6 +16,8 @@ import AddAddress from './src/Screens/AddAddress';
 import SubCategory from './src/Screens/SubCategory';
 import ProductDetails from './src/Screens/ProductDetails';
 import Cart from './src/Screens/Cart';
+import Login from './src/Screens/Login';
+import OtpScreen from './src/Screens/OtpScreen';
 const Stack = createNativeStackNavigator();
 const Drawer = createDrawerNavigator();
 
@@ -48,11 +50,14 @@ const App=()=> {
             headerShown: true,
             title: 'Choose Address',
             headerStyle: { backgroundColor: 'red' },
+            headerTintColor: 'black',
           }}
         />
         <Stack.Screen name="AddAddress" component={AddAddress} />
         <Stack.Screen name="SubCategory" component={SubCategory} />
         <Stack.Screen name="ProductDetails" component={ProductDetails} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="OtpScreen" component={OtpScreen} />
         <Stack.Screen name="Cart" component={Cart} />
       </Stack.Navigator>
     </NavigationContainer>

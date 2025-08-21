@@ -101,12 +101,13 @@ export const decreaseProductQuantity = async product => {
 };
 
 // Remove product from cart
-export const removeProductFromCart = async productId => {
+export const removeProductFromCart = async product => {
   try {
-    if (!productId) {
-      throw new Error('Product ID is required for removal');
+    if (!product || (!product.id && !product.product_id)) {
+      throw new Error('Invalid product: missing ID');
     }
 
+    const productId = product.id ?? product.product_id;
     await removeCartItem(productId);
     emitCartUpdated();
   } catch (error) {
