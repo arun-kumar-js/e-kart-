@@ -30,6 +30,7 @@ import PrivacyPolicy from "./src/Screens/SideDrawer/PrivacyPolicy";
 import Notifications from "./src/Screens/SideDrawer/Notification";
 import ShareApp from "./src/Screens/SideDrawer/ShareApp";
 import TrackOrder from "./src/Screens/SideDrawer/TrackOrder";
+import TrackOrderDetails from "./src/Screens/SideDrawer/TrackOrderDetails";
 import FontTest from "./src/components/FontTest";
 
 const Stack = createNativeStackNavigator();
@@ -176,6 +177,13 @@ const App = () => {
             title: "Track Order",
             headerStyle: { backgroundColor: "red" },
             headerTintColor: "white",
+          }}
+        />
+        <Stack.Screen
+          name="TrackOrderDetails"
+          component={TrackOrderDetails}
+          options={{
+            headerShown: false,
           }}
         />
         <Stack.Screen
