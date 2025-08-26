@@ -1,57 +1,125 @@
-import React, { useEffect, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { View, Text, Image, StyleSheet, TouchableOpacity, Alert, ScrollView } from 'react-native';
-import { DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
+import React, { useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+} from "react-native";
+import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
+import axios from "axios";
+import { DELETE_USER, API_ACCESS_KEY } from "../config/config";
 
-import HomeIcon from '../Assets/icon/home.png';
-import CartIcon from '../Assets/icon/cart.png';
-import NotificationIcon from '../Assets/icon/bell.png';
-import TrackOrderIcon from '../Assets/icon/track.png';
-import ReferIcon from '../Assets/icon/refer.png';
-import ContactIcon from '../Assets/icon/phone.png';
-import AboutIcon from '../Assets/icon/about.png';
-import RateIcon from '../Assets/icon/star.png';
-import ShareIcon from '../Assets/icon/share.png';
-import FAQIcon from '../Assets/icon/FAQ.png';
-import TermsIcon from '../Assets/icon/terms.png';
-import PrivacyIcon from '../Assets/icon/privacy.png';
+import HomeIcon from "../Assets/icon/home.png";
+import CartIcon from "../Assets/icon/cart.png";
+import NotificationIcon from "../Assets/icon/bell.png";
+import TrackOrderIcon from "../Assets/icon/track.png";
+import ReferIcon from "../Assets/icon/refer.png";
+import ContactIcon from "../Assets/icon/phone.png";
+import AboutIcon from "../Assets/icon/about.png";
+import RateIcon from "../Assets/icon/star.png";
+import ShareIcon from "../Assets/icon/share.png";
+import FAQIcon from "../Assets/icon/FAQ.png";
+import TermsIcon from "../Assets/icon/terms.png";
+import PrivacyIcon from "../Assets/icon/privacy.png";
 // Remove image-based icons for Logout and Delete Account
-import Ionicons from 'react-native-vector-icons/Ionicons';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import Ionicons from "react-native-vector-icons/Ionicons";
+import MaterialIcons from "react-native-vector-icons/MaterialIcons";
 const SlideBar = (props) => {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const storedUser = await AsyncStorage.getItem('userData');
-        
+        const storedUser = await AsyncStorage.getItem("userData");
+
         if (storedUser) {
           setUser(JSON.parse(storedUser));
         }
       } catch (e) {
-        console.error('Failed to load user', e);
+        console.error("Failed to load user", e);
       }
     };
     loadUser();
   }, []);
+
+  const deleteAccount = async () => {
+    try {
+      if (!user || !user.user_id) {
+        Alert.alert("Error", "User not logged in");
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append("accesskey", API_ACCESS_KEY);
+      formData.append("type", "delete_user");
+      formData.append("user_id", user.user_id);
+
+      const response = await axios.post(DELETE_USER, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      if (response.data && !response.data.error) {
+        Alert.alert("Success", "Account deleted successfully", [
+          {
+            text: "OK",
+            onPress: async () => {
+              await AsyncStorage.removeItem("userData");
+              props.navigation.replace("Home");
+            },
+          },
+        ]);
+      } else {
+        Alert.alert(
+          "Error",
+          response.data.message || "Failed to delete account"
+        );
+      }
+    } catch (error) {
+      console.error("Delete account error:", error);
+      Alert.alert("Error", "Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <DrawerContentScrollView {...props} contentContainerStyle={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
         <View style={styles.header}>
           {user ? (
-            <View style={{ alignItems: 'center' }}>
-              <Image
-                source={require('../Assets/Images/logo.png')}
-                style={styles.logo}
-                resizeMode="contain"
-              />
-              <Text style={styles.loginText}>{user.name || 'User'}</Text>
-              <Text style={styles.phoneText}>{user.mobile || ''}</Text>
+            <View style={{ alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={() =>
+                  props.navigation.navigate("Profile", { userData: user })
+                }
+                style={styles.profileImageContainer}
+              >
+                {user.profile_image ? (
+                  <Image
+                    source={{ uri: user.profile_image }}
+                    style={styles.profileImage}
+                  />
+                ) : (
+                  <View style={styles.defaultProfileImage}>
+                    <Text style={styles.profileInitial}>
+                      {(user.name || user.user_name || "U")
+                        .charAt(0)
+                        .toUpperCase()}
+                    </Text>
+                  </View>
+                )}
+              </TouchableOpacity>
+              <Text style={styles.loginText}>
+                {user.name || user.user_name || "User"}
+              </Text>
+              <Text style={styles.phoneText}>{user.mobile || ""}</Text>
             </View>
           ) : (
-            <TouchableOpacity onPress={() => props.navigation.navigate('Login')}>
+            <TouchableOpacity
+              onPress={() => props.navigation.navigate("Login")}
+            >
               <Text style={styles.loginText}>Login ?</Text>
             </TouchableOpacity>
           )}
@@ -63,7 +131,7 @@ const SlideBar = (props) => {
             )}
             label="Home"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('Home')}
+            onPress={() => props.navigation.navigate("Home")}
           />
           <DrawerItem
             icon={() => (
@@ -71,7 +139,17 @@ const SlideBar = (props) => {
             )}
             label="Cart"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('Cart')}
+            onPress={() => props.navigation.navigate("Cart")}
+          />
+          <DrawerItem
+            icon={() => (
+              <Ionicons name="person-outline" size={24} color="#000" />
+            )}
+            label="Profile"
+            labelStyle={styles.textCommon}
+            onPress={() =>
+              props.navigation.navigate("Profile", { userData: user })
+            }
           />
           <DrawerItem
             icon={() => (
@@ -82,18 +160,27 @@ const SlideBar = (props) => {
             )}
             label="Notifications"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('Notifications')}
+            onPress={() => props.navigation.navigate("Notifications")}
             style={{ marginBottom: 10 }}
           />
           {/* Spacing after Notifications and before Track Order */}
-          <View style={{ height: 1, backgroundColor: '#d3d3d3', marginVertical: 10 }} />
+          <View
+            style={{
+              height: 1,
+              backgroundColor: "#d3d3d3",
+              marginVertical: 10,
+            }}
+          />
           <DrawerItem
             icon={() => (
-              <Image source={TrackOrderIcon} style={{ width: 24, height: 24 }} />
+              <Image
+                source={TrackOrderIcon}
+                style={{ width: 24, height: 24 }}
+              />
             )}
             label="Track Order"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('TrackOrder')}
+            onPress={() => props.navigation.navigate("TrackOrder")}
           />
           <DrawerItem
             icon={() => (
@@ -101,18 +188,24 @@ const SlideBar = (props) => {
             )}
             label="Refer & Earn"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('Refer & Earn')}
+            onPress={() => props.navigation.navigate("Refer & Earn")}
             style={{ marginBottom: 10 }}
           />
           {/* Spacing after Refer & Earn and before Contact */}
-          <View style={{ height: 1, backgroundColor: '#d3d3d3', marginVertical: 10 }} />
+          <View
+            style={{
+              height: 1,
+              backgroundColor: "#d3d3d3",
+              marginVertical: 10,
+            }}
+          />
           <DrawerItem
             icon={() => (
               <Image source={ContactIcon} style={{ width: 24, height: 24 }} />
             )}
             label="Contact"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('Contact')}
+            onPress={() => props.navigation.navigate("Contact")}
           />
           <DrawerItem
             icon={() => (
@@ -120,7 +213,7 @@ const SlideBar = (props) => {
             )}
             label="About Us"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('About')}
+            onPress={() => props.navigation.navigate("About")}
           />
           <DrawerItem
             icon={() => (
@@ -128,7 +221,7 @@ const SlideBar = (props) => {
             )}
             label="Rate Us"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('Rate Us')}
+            onPress={() => props.navigation.navigate("Rate Us")}
           />
           <DrawerItem
             icon={() => (
@@ -136,18 +229,24 @@ const SlideBar = (props) => {
             )}
             label="Share App"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('ShareApp')}
+            onPress={() => props.navigation.navigate("ShareApp")}
             style={{ marginBottom: 10 }}
           />
           {/* Spacing after Share App and before FAQ */}
-          <View style={{ height: 1, backgroundColor: '#d3d3d3', marginVertical: 10 }} />
+          <View
+            style={{
+              height: 1,
+              backgroundColor: "#d3d3d3",
+              marginVertical: 10,
+            }}
+          />
           <DrawerItem
             icon={() => (
               <Image source={FAQIcon} style={{ width: 24, height: 24 }} />
             )}
             label="FAQ"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('FAQ')}
+            onPress={() => props.navigation.navigate("FAQ")}
           />
           <DrawerItem
             icon={() => (
@@ -155,7 +254,7 @@ const SlideBar = (props) => {
             )}
             label="Terms & Conditions"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('TermsAndConditions')}
+            onPress={() => props.navigation.navigate("TermsAndConditions")}
           />
           <DrawerItem
             icon={() => (
@@ -163,34 +262,45 @@ const SlideBar = (props) => {
             )}
             label="Privacy Policy"
             labelStyle={styles.textCommon}
-            onPress={() => props.navigation.navigate('PrivacyPolicy')}
+            onPress={() => props.navigation.navigate("PrivacyPolicy")}
           />
           {/* Spacing after Privacy Policy and before Logout/Logo section */}
-          <View style={{ height: 1, backgroundColor: '#d3d3d3', marginVertical: 10 }} />
-          <DrawerItem
-            icon={() => <Ionicons name="log-out-outline" size={24} color="#000" />}
-            label="Logout"
-            labelStyle={styles.textCommon}
-            onPress={async () => {
-              await AsyncStorage.removeItem('userData');
-              props.navigation.replace('Login');
+          <View
+            style={{
+              height: 1,
+              backgroundColor: "#d3d3d3",
+              marginVertical: 10,
             }}
           />
           <DrawerItem
-            icon={() => <MaterialIcons name="delete-outline" size={24} color="red" />}
+            icon={() => (
+              <Ionicons name="log-out-outline" size={24} color="#000" />
+            )}
+            label="Logout"
+            labelStyle={styles.textCommon}
+            onPress={async () => {
+              await AsyncStorage.removeItem("userData");
+              props.navigation.replace("Login");
+            }}
+          />
+          <DrawerItem
+            icon={() => (
+              <MaterialIcons name="delete-outline" size={24} color="red" />
+            )}
             label="Delete Account"
-            labelStyle={[styles.textCommon, { color: 'red' }]}
+            labelStyle={[styles.textCommon, { color: "red" }]}
             onPress={() => {
               Alert.alert(
-                'Delete Account',
-                'Are you sure you want to delete your account?',
+                "Delete Account",
+                "Do you want to delete? You will lost your data",
                 [
-                  { text: 'Cancel', style: 'cancel' },
+                  { text: "No", style: "cancel" },
                   {
-                    text: 'Yes',
-                    onPress: () => console.log('Delete account API call here'),
+                    text: "Yes",
+                    style: "destructive",
+                    onPress: deleteAccount,
                   },
-                ],
+                ]
               );
             }}
           />
@@ -202,39 +312,58 @@ const SlideBar = (props) => {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: '#FF0000',
-    alignItems: 'center',
+    backgroundColor: "#FF0000",
+    alignItems: "center",
     paddingVertical: 30,
   },
-  logo: {
+  profileImageContainer: {
+    marginBottom: 10,
+  },
+  profileImage: {
     width: 80,
     height: 80,
     borderRadius: 40,
-    marginBottom: 10,
+    borderWidth: 3,
+    borderColor: "#fff",
+  },
+  defaultProfileImage: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 3,
+    borderColor: "#fff",
+  },
+  profileInitial: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: "#FF0000",
   },
   textCommon: {
-    fontFamily: 'Poppins',
-    fontWeight: '400',
+    fontFamily: "Poppins",
+    fontWeight: "400",
     fontSize: 16,
     lineHeight: 20,
     letterSpacing: 0,
-    textTransform: 'capitalize',
+    textTransform: "capitalize",
   },
   loginText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
-    fontFamily: 'Poppins',
+    fontWeight: "bold",
+    fontFamily: "Poppins",
   },
   drawerList: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     paddingTop: 10,
   },
   phoneText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontFamily: 'Poppins',
+    fontFamily: "Poppins",
     marginTop: 4,
   },
 });

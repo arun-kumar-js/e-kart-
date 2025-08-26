@@ -14,6 +14,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import { WALLET, API_ACCESS_KEY } from "../../config/config";
 
+
+
+
+
 type ListItemProps = {
   icon: string;
   label: string;
@@ -199,12 +203,10 @@ const More = ({ navigation }: { navigation: any }) => {
                 {userData?.mobile || "0000000000"}
               </Text>
             </View>
-            <TouchableOpacity
+           <TouchableOpacity
               style={styles.editButton}
               onPress={() => {
-                // Navigate to edit profile screen
-                console.log("Edit Profile pressed");
-                // You can add navigation to edit profile screen here
+                navigation.navigate("EditProfile", { userData });
               }}
             >
               <Text style={styles.editButtonText}>Edit Profile</Text>

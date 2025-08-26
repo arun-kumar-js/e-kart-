@@ -12,7 +12,13 @@ import {
 } from "./CartService";
 import { onCartUpdated, offCartUpdated } from "./cartEvents";
 
-const CartButton = ({ product, initialQuantity = 0, onChange, tax = 0 }) => {
+const CartButton = ({
+  product,
+  initialQuantity = 0,
+  onChange,
+  tax = 0,
+  size = "default",
+}) => {
   const [quantity, setQuantity] = useState(initialQuantity);
 
   // Debug log for quantity changes
@@ -104,34 +110,120 @@ const CartButton = ({ product, initialQuantity = 0, onChange, tax = 0 }) => {
     }
   };
 
+  // Get styles based on size
+  const getSizeStyles = () => {
+    switch (size) {
+      case "small":
+        return {
+          cartContainer: {
+            height: hp("4%"),
+            paddingHorizontal: wp("1.5%"),
+          },
+          quantityButton: {
+            paddingHorizontal: wp("2%"),
+            paddingVertical: hp("0.7%"),
+          },
+          quantityButtonText: {
+            fontSize: wp("3.5%"),
+          },
+          countBox: {
+            paddingHorizontal: wp("2%"),
+            paddingVertical: hp("1%"),
+            minWidth: wp("8%"),
+          },
+          countText: {
+            fontSize: wp("3%"),
+          },
+          addButton: {
+            paddingVertical: hp("1.4%"),
+          },
+          addButtonText: {
+            fontSize: wp("3%"),
+          },
+        };
+      case "large":
+        return {
+          cartContainer: {
+            height: hp("6%"),
+            paddingHorizontal: wp("3%"),
+          },
+          quantityButton: {
+            paddingHorizontal: wp("4%"),
+            paddingVertical: hp("1.2%"),
+          },
+          quantityButtonText: {
+            fontSize: wp("5.5%"),
+          },
+          countBox: {
+            paddingHorizontal: wp("4%"),
+            paddingVertical: hp("2%"),
+            minWidth: wp("12%"),
+          },
+          countText: {
+            fontSize: wp("5%"),
+          },
+          addButton: {
+            paddingVertical: hp("2.2%"),
+          },
+          addButtonText: {
+            fontSize: wp("5%"),
+          },
+        };
+      default:
+        return {
+          cartContainer: {},
+          quantityButton: {},
+          quantityButtonText: {},
+          countBox: {},
+          countText: {},
+          addButton: {},
+          addButtonText: {},
+        };
+    }
+  };
+
+  const sizeStyles = getSizeStyles();
+
   return (
     <View style={{ flex: 1 }}>
       {quantity > 0 ? (
-        <View style={styles.cartContainer}>
+        <View style={[styles.cartContainer, sizeStyles.cartContainer]}>
           <TouchableOpacity
-            style={styles.quantityButton}
+            style={[styles.quantityButton, sizeStyles.quantityButton]}
             onPress={handleDecrease}
             onLongPress={handleRemove}
           >
-            <Text style={styles.quantityButtonText}>-</Text>
+            <Text
+              style={[styles.quantityButtonText, sizeStyles.quantityButtonText]}
+            >
+              -
+            </Text>
           </TouchableOpacity>
-          <View style={styles.countBox}>
-            <Text style={styles.countText}>{quantity}</Text>
+          <View style={[styles.countBox, sizeStyles.countBox]}>
+            <Text style={[styles.countText, sizeStyles.countText]}>
+              {quantity}
+            </Text>
           </View>
           <TouchableOpacity
-            style={styles.quantityButton}
+            style={[styles.quantityButton, sizeStyles.quantityButton]}
             onPress={handleIncrease}
           >
-            <Text style={styles.quantityButtonText}>+</Text>
+            <Text
+              style={[styles.quantityButtonText, sizeStyles.quantityButtonText]}
+            >
+              +
+            </Text>
           </TouchableOpacity>
         </View>
       ) : (
         <View style={styles.addButtonContainer}>
           <TouchableOpacity
-            style={styles.addButton}
+            style={[styles.addButton, sizeStyles.addButton]}
             onPress={() => updateQuantity(1)}
           >
-            <Text style={styles.addButtonText}>Add</Text>
+            <Text style={[styles.addButtonText, sizeStyles.addButtonText]}>
+              Add
+            </Text>
           </TouchableOpacity>
         </View>
       )}

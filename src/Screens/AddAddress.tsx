@@ -310,8 +310,10 @@ const AddAddress = () => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar backgroundColor={HEADER_COLOR} barStyle="light-content" />
+    <>
+      <StatusBar hidden={true} />
+      <SafeAreaView style={{ flex: 1, backgroundColor: BACKGROUND_COLOR }}>
+        <View style={styles.container}>
 
       {/* Header */}
       <View style={styles.header}>
@@ -619,7 +621,9 @@ const AddAddress = () => {
           </View>
         </View>
       </Modal>
-    </SafeAreaView>
+        </View>
+      </SafeAreaView>
+    </>
   );
 };
 
@@ -627,6 +631,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: BACKGROUND_COLOR,
+    
   },
   header: {
     backgroundColor: HEADER_COLOR,
@@ -634,7 +639,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: wp("4%"),
-    paddingVertical: hp("2%"),
+    paddingTop: hp("1.4%"), // use height percentage for top padding to push below status bar
+    paddingBottom: hp("2%"),
   },
   backButton: {
     padding: wp("2%"),

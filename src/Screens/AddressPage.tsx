@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { heightPercentageToDP as hp } from "react-native-responsive-screen";
 import {
   StyleSheet,
   View,
@@ -11,6 +12,7 @@ import {
   StatusBar,
   Alert,
   RefreshControl,
+  SafeAreaView,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { createStackNavigator } from "@react-navigation/stack";
@@ -18,6 +20,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import { API_ACCESS_KEY, GET_ALL_ADDRESSES } from "../config/config";
 import axios from "axios";
 import { s } from "react-native-size-matters";
+import Header from "../components/Header";
 
 interface Address {
   id: string;
@@ -246,49 +249,10 @@ const ChooseAddressScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      {/* Debug Section - Remove after testing */}
-      <View style={styles.debugSection}>
-        <Text style={styles.debugText}>Debug Info:</Text>
-        <Text style={styles.debugText}>
-          User: {user ? "Logged In" : "Not Logged In"}
-        </Text>
-        <Text style={styles.debugText}>User ID: {user?.user_id || "None"}</Text>
-        <Text style={styles.debugText}>Addresses: {addresses.length}</Text>
-        <TouchableOpacity
-          style={styles.debugButton}
-          onPress={async () => {
-            const storedUser = await AsyncStorage.getItem("userData");
-            console.log("🔍 DEBUG - Stored user data:", storedUser);
-            if (storedUser) {
-              const userObj = JSON.parse(storedUser);
-              console.log("🔍 DEBUG - Parsed user object:", userObj);
-              Alert.alert(
-                "Debug Info",
-                `User ID: ${userObj.user_id || "Not found"}\nMobile: ${
-                  userObj.mobile || "Not found"
-                }`
-              );
-            } else {
-              Alert.alert("Debug Info", "No user data found in AsyncStorage");
-            }
-          }}
-        >
-          <Text style={styles.debugButtonText}>Check AsyncStorage</Text>
-        </TouchableOpacity>
-      </View>
-
-      {loading ? (
-        <ActivityIndicator size="large" color="#EF3340" />
-      ) : addresses.length === 0 ? (
-        <>
-          <Image
-            source={require("../Assets/Images/No-Address.png")}
-            style={styles.image}
-          />
-          <Text style={styles.title}>No Address Found</Text>
-        </>
-      ) : (
+    <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
+      <View style={{ paddingTop: hp("7%"), width: "100%" }}></View>
+      <Header title="Choose Address" onBack={() => navigation.goBack()} />
+      <View style={[styles.container, { marginTop: hp("2%") }]}>
         <FlatList
           data={addresses}
           keyExtractor={(item) => item.id}
@@ -302,40 +266,40 @@ const ChooseAddressScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
             />
           }
         />
-      )}
 
-      <View style={styles.bottomButtonContainer}>
-        <TouchableOpacity
-          style={[styles.bottomButton, styles.addNewButton]}
-          onPress={() => {
-            if (user && user.user_id) {
-              navigation.navigate("AddAddress", { user_id: user.user_id });
-            }
-          }}
-        >
-          <Text style={[styles.bottomButtonText, styles.addNewButtonText]}>
-            Add New Address
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.bottomButtonContainer}>
+          <TouchableOpacity
+            style={[styles.bottomButton, styles.addNewButton]}
+            onPress={() => {
+              if (user && user.user_id) {
+                navigation.navigate("AddAddress", { user_id: user.user_id });
+              }
+            }}
+          >
+            <Text style={[styles.bottomButtonText, styles.addNewButtonText]}>
+              Add New Address
+            </Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.bottomButton}
-          onPress={() => {
-            if (selectedAddressId) {
-              const selectedAddress = addresses.find(
-                (addr) => addr.id === selectedAddressId
-              );
-              navigation.navigate("Checkout", { selectedAddress });
-            } else {
-              Alert.alert(
-                "Select Address",
-                "Please select an address to continue"
-              );
-            }
-          }}
-        >
-          <Text style={styles.bottomButtonText}>Continue</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.bottomButton}
+            onPress={() => {
+              if (selectedAddressId) {
+                const selectedAddress = addresses.find(
+                  (addr) => addr.id === selectedAddressId
+                );
+                navigation.navigate("Checkout", { selectedAddress });
+              } else {
+                Alert.alert(
+                  "Select Address",
+                  "Please select an address to continue"
+                );
+              }
+            }}
+          >
+            <Text style={styles.bottomButtonText}>Continue</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -344,9 +308,23 @@ const ChooseAddressScreen: React.FC<{ navigation: any }> = ({ navigation }) => {
 const Stack = createStackNavigator();
 
 const AddressPage: React.FC = () => {
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      StatusBar.setHidden(true, "slide");
+      StatusBar.setTranslucent(true);
+      StatusBar.setBackgroundColor("transparent");
+    }
+  }, []);
   return (
     <>
-      <StatusBar barStyle="light-content" backgroundColor="#EF3340" />
+      {Platform.OS === "ios" && (
+        <StatusBar
+          hidden={true}
+          translucent={true}
+          backgroundColor="transparent"
+          barStyle="light-content"
+        />
+      )}
       <Stack.Navigator
         screenOptions={{
           headerStyle: {
@@ -373,7 +351,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#FFFFFF",
-    alignItems: "center",
     justifyContent: "center",
     padding: 20,
   },
@@ -417,12 +394,12 @@ const styles = StyleSheet.create({
     height: 16,
     borderRadius: 8,
     borderWidth: 2,
-    borderColor: "#EF3340",
+    borderColor: "green",
     marginRight: 12,
   },
   selectedCircle: {
-    backgroundColor: "#EF3340", // changed to theme color
-    borderColor: "#EF3340",
+    backgroundColor: "green", // changed to theme color
+    borderColor: "green",
   },
   selectedAddressCard: {
     borderWidth: 2,

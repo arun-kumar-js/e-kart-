@@ -1,4 +1,3 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import React, { useState, useCallback } from "react";
 import {
   SafeAreaView,
@@ -10,36 +9,63 @@ import {
   FlatList,
   Image,
   TouchableOpacity,
+  Alert,
 } from "react-native";
 import axios from "axios";
 import { useFocusEffect } from "@react-navigation/native";
 import { TRACK_OREDER, API_ACCESS_KEY } from "../../config/config";
 import { commonTextStyles } from "../../config/globalStyles";
+import Header from "../../components/Header";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const TrackOrder = ({ navigation }) => {
   console.log("TrackOrder component mounted");
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  const [user, setUser] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
+
+  const checkUserData = async () => {
+    try {
+      setUserLoading(true);
+      const storedUser = await AsyncStorage.getItem("userData");
+
+      if (storedUser) {
+        const userObj = JSON.parse(storedUser);
+        setUser(userObj);
+        return userObj;
+      } else {
+        setUser(null);
+        return null;
+      }
+    } catch (error) {
+      console.log("Error checking user data:", error);
+      setUser(null);
+      return null;
+    } finally {
+      setUserLoading(false);
+    }
+  };
 
   const fetchNotifications = async () => {
     console.log("Starting Notifications API fetch...");
     setLoading(true);
     setErrorMessage("");
+
+    // Check if user is logged in
+    const userData = await checkUserData();
+    if (!userData || !userData.user_id) {
+      setErrorMessage("Please login to view your orders");
+      setLoading(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
       formData.append("get_orders", "1");
       formData.append("accesskey", API_ACCESS_KEY);
-
-      // Retrieve userData from AsyncStorage and append user_id if available
-      const userData = await AsyncStorage.getItem("userData");
-      if (userData) {
-        const parsedUser = JSON.parse(userData);
-        if (parsedUser?.user_id) {
-          console.log("Retrieved userData:", parsedUser.user_id);
-          formData.append("user_id", parsedUser.user_id);
-        }
-      }
+      formData.append("user_id", userData.user_id);
 
       const response = await axios.post(TRACK_OREDER, formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -56,7 +82,7 @@ const TrackOrder = ({ navigation }) => {
         setNotifications(response.data.data);
       } else {
         console.log("API returned error or empty content", response.data);
-        setErrorMessage("API returned error or empty content");
+        setErrorMessage("No orders found");
       }
     } catch (error) {
       console.log("API fetch error:", error);
@@ -69,8 +95,12 @@ const TrackOrder = ({ navigation }) => {
 
   useFocusEffect(
     useCallback(() => {
-      console.log("Notifications page focused, triggering API fetch...");
-      fetchNotifications();
+      console.log("TrackOrder page focused, checking user data...");
+      checkUserData().then((userData) => {
+        if (userData && userData.user_id) {
+          fetchNotifications();
+        }
+      });
     }, [])
   );
 
@@ -142,7 +172,25 @@ const TrackOrder = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {loading ? (
+      <Header
+        title="Track Order"
+        onBack={() => navigation.navigate("MainDrawer", { screen: "Home" })}
+      />
+      {userLoading ? (
+        <ActivityIndicator size="large" color="#EE2737" />
+      ) : !user ? (
+        <View style={styles.loginContainer}>
+          <Text style={styles.loginMessage}>
+            Please login to view your orders
+          </Text>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => navigation.navigate("Login")}
+          >
+            <Text style={styles.loginButtonText}>Login</Text>
+          </TouchableOpacity>
+        </View>
+      ) : loading ? (
         <ActivityIndicator size="large" color="#EE2737" />
       ) : errorMessage ? (
         <View style={{ padding: 20 }}>
@@ -200,7 +248,32 @@ const styles = StyleSheet.create({
     color: "#EE2737",
     marginBottom: 15,
   },
-  errorText: { fontSize: 16, color: "red", fontFamily: "Poppins" },
+  errorText: { fontSize: 16, color: "#000", fontFamily: "Poppins" },
+  loginContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  loginMessage: {
+    fontSize: 18,
+    color: "#666",
+    textAlign: "center",
+    marginBottom: 20,
+    fontFamily: "Poppins",
+  },
+  loginButton: {
+    backgroundColor: "#EE2737",
+    paddingHorizontal: 30,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    fontFamily: "Poppins",
+  },
   notificationTitle: {
     fontSize: 16,
     fontWeight: "bold",

@@ -22,6 +22,7 @@ import {
 import { useRoute, useNavigation } from "@react-navigation/native";
 
 import { fetchCartItems } from "../Fuctions/CartService";
+import Header from "../components/Header";
 
 const CheckoutScreen = () => {
   const route = useRoute();
@@ -118,24 +119,13 @@ const CheckoutScreen = () => {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? hp("12%") : 0}
       >
+        <Header title="Checkout" onBack={() => navigation.goBack()} />
         <ScrollView
           style={styles.container}
           contentContainerStyle={{ paddingBottom: hp("12%") }}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          {/* Header */}
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={styles.backButton}
-              onPress={() => navigation.goBack()}
-            >
-              <Icon name="arrow-back" size={wp("6%")} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Checkout</Text>
-            <View style={styles.headerPlaceholder} />
-          </View>
-
           {/* Progress Bar */}
           <View style={styles.progressBar}>
             <View style={styles.progressStepActive}>
@@ -299,125 +289,57 @@ const CheckoutScreen = () => {
           {/* Order Summary */}
           <View style={styles.card}>
             <Text style={styles.sectionTitle}>Order Summary</Text>
-            <View style={styles.orderHeader}>
-              <Text style={[styles.orderCell, { flex: 3, textAlign: "left" }]}>
-                Product Name
-              </Text>
-              <Text
-                style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-              >
-                Qty
-              </Text>
-              <Text
-                style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-              >
-                Price
-              </Text>
-              <Text
-                style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-              >
-                Subtotal
-              </Text>
-              <Text
-                style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-              >
-                CG
-              </Text>
+
+            {/* Order Items Table */}
+            <View style={styles.orderTable}>
+              {/* Table Header */}
+              <View style={styles.orderHeader}>
+                <Text style={styles.orderHeaderCell}>Product</Text>
+                <Text style={styles.orderHeaderCell}>Qty</Text>
+                <Text style={styles.orderHeaderCell}>Price</Text>
+                <Text style={styles.orderHeaderCell}>Total</Text>
+              </View>
+
+              {/* Order Items */}
+              {cartItems.map((item, index) => (
+                <View key={index} style={styles.orderRow}>
+                  <Text style={styles.orderProductCell} numberOfLines={2}>
+                    {item.name}
+                  </Text>
+                  <Text style={styles.orderCell}>{item.quantity}</Text>
+                  <Text style={styles.orderCell}>RM{item.price}</Text>
+                  <Text style={styles.orderCell}>
+                    RM{(item.price * item.quantity).toFixed(2)}
+                  </Text>
+                </View>
+              ))}
             </View>
-            {cartItems.map((item, index) => (
-              <View key={index} style={styles.orderRow}>
-                <Text
-                  style={[styles.orderCell, { flex: 3, textAlign: "center" }]}
-                >
-                  {item.name}
-                </Text>
-                <Text
-                  style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-                >
-                  {item.quantity}
-                </Text>
-                <Text
-                  style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-                >
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>
-                  {item.price}
-                </Text>
-                <Text
-                  style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-                >
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>
-                  {item.price * item.quantity}
-                </Text>
-                <Text
-                  style={[styles.orderCell, { flex: 1, textAlign: "center" }]}
-                >
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>
-                  {(item.price * item.quantity * 0.08).toFixed(2)}
+
+            {/* Summary Breakdown */}
+            <View style={styles.summaryBreakdown}>
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Subtotal</Text>
+                <Text style={styles.summaryValue}>
+                  RM{taxableAmount.toFixed(2)}
                 </Text>
               </View>
-            ))}
-            {/* Summary */}
-            <View style={{ marginTop: hp("1%") }}>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text style={styles.summaryText}>Taxable Amount</Text>
-                <Text style={styles.summaryText}>
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>{" "}
-                  {taxableAmount.toFixed(2)}
+
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Tax (8%)</Text>
+                <Text style={styles.summaryValue}>RM{tax.toFixed(2)}</Text>
+              </View>
+
+              <View style={styles.summaryRow}>
+                <Text style={styles.summaryLabel}>Delivery Charge</Text>
+                <Text style={styles.summaryValue}>
+                  RM{deliveryCharge.toFixed(2)}
                 </Text>
               </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text style={styles.summaryText}>Tax (8%)</Text>
-                <Text style={styles.summaryText}>
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>{" "}
-                  {tax.toFixed(2)}
-                </Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                }}
-              >
-                <Text style={styles.summaryText}>Delivery Charge</Text>
-                <Text style={styles.summaryText}>
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>{" "}
-                  {deliveryCharge.toFixed(2)}
-                </Text>
-              </View>
-              <View
-                style={{
-                  flexDirection: "row",
-                  justifyContent: "space-between",
-                  marginTop: hp("0.5%"),
-                }}
-              >
-                <Text
-                  style={[
-                    styles.summaryText,
-                    { fontWeight: "bold", color: "#111" },
-                  ]}
-                >
-                  Total
-                </Text>
-                <Text
-                  style={[
-                    styles.summaryText,
-                    { fontWeight: "bold", color: "#111" },
-                  ]}
-                >
-                  <Text style={{ fontSize: wp("2.5%") }}>RM</Text>{" "}
-                  {total.toFixed(2)}
-                </Text>
+
+              {/* Total */}
+              <View style={styles.totalRow}>
+                <Text style={styles.totalLabel}>Total Amount</Text>
+                <Text style={styles.totalValue}>RM{total.toFixed(2)}</Text>
               </View>
             </View>
           </View>
@@ -607,27 +529,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 0,
   },
-  header: {
-    backgroundColor: "#ED1B26",
-    paddingTop: hp("2%"),
-    paddingBottom: hp("2%"),
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: wp("5%"),
-  },
-  backButton: {
-    padding: wp("2%"),
-  },
-  headerPlaceholder: {
-    width: wp("10%"),
-  },
-  headerTitle: {
-    color: "#fff",
-    fontSize: wp("6%"),
-    fontWeight: "bold",
-    flex: 1,
-    textAlign: "center",
-  },
+
   progressBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -714,31 +616,86 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: hp("0.5%"),
   },
+  orderTable: {
+    marginTop: hp("1%"),
+  },
   orderHeader: {
     flexDirection: "row",
-    borderBottomColor: "#bbb",
+    borderBottomColor: "#ddd",
     borderBottomWidth: 1,
-    paddingBottom: hp("0.5%"),
-    fontWeight: "bold",
+    paddingBottom: hp("1%"),
+    marginBottom: hp("1%"),
+  },
+  orderHeaderCell: {
+    flex: 1,
+    fontSize: wp("3.5%"),
+    color: "#666",
+    fontWeight: "600",
+    textAlign: "center",
   },
   orderRow: {
     flexDirection: "row",
-    marginTop: hp("0.5%"),
-    paddingBottom: hp("1%"),
+    paddingVertical: hp("1%"),
     borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    borderBottomColor: "#f0f0f0",
+    alignItems: "center",
+  },
+  orderProductCell: {
+    flex: 2,
+    fontSize: wp("3.5%"),
+    color: "#333",
+    fontWeight: "500",
+    paddingHorizontal: wp("1%"),
+    textAlign: "left",
   },
   orderCell: {
-    fontSize: wp("4%"),
-    color: "#222",
-    fontWeight: "bold",
+    flex: 1,
+    fontSize: wp("3.5%"),
+    color: "#666",
+    fontWeight: "500",
+    textAlign: "center",
     paddingHorizontal: wp("1%"),
   },
-  summaryText: {
-    color: "#888",
-    fontSize: wp("3.5%"),
-    marginVertical: hp("0.1%"),
-    marginLeft: wp("2.5%"),
+  summaryBreakdown: {
+    marginTop: hp("2%"),
+    paddingTop: hp("2%"),
+   // borderTopWidth: 1,
+    borderTopColor: "#eee",
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: hp("0.5%"),
+  },
+  summaryLabel: {
+    fontSize: wp("4%"),
+    color: "#666",
+    fontWeight: "500",
+  },
+  summaryValue: {
+    fontSize: wp("4%"),
+    color: "#333",
+    fontWeight: "600",
+  },
+  totalRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingTop: hp("1%"),
+    marginTop: hp("1%"),
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+  },
+  totalLabel: {
+    fontSize: wp("4.5%"),
+    color: "#111",
+    fontWeight: "bold",
+  },
+  totalValue: {
+    fontSize: wp("4.5%"),
+    color: "#ED1B26",
+    fontWeight: "bold",
   },
   totalBar: {
     flexDirection: "row",

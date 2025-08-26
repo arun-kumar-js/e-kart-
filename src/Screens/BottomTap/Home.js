@@ -22,6 +22,7 @@ import { HOMEPAGE_ENDPOINT, API_ACCESS_KEY } from "../../config/config";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import CartButton from "../../Fuctions/CartButton";
+import { getCartItemCount } from "../../Fuctions/CartService";
 
 const { width: screenWidth } = Dimensions.get("window");
 
@@ -33,6 +34,7 @@ const HomeScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
   const promotion = data?.section;
 
   //console.log('Fetched homepage data:', promotion);
@@ -95,6 +97,16 @@ const HomeScreen = () => {
   // Banner auto-slide state
   const bannerRef = useRef(null);
   const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+
+  // Fetch cart count
+  const fetchCartCount = async () => {
+    try {
+      const count = await getCartItemCount();
+      setCartCount(count);
+    } catch (error) {
+      console.log("Error fetching cart count:", error);
+    }
+  };
 
   // Banner auto-scroll effect
   useEffect(() => {
@@ -189,6 +201,7 @@ const HomeScreen = () => {
   useFocusEffect(
     React.useCallback(() => {
       fetchUserAddress();
+      fetchCartCount();
     }, [])
   );
 
@@ -271,8 +284,11 @@ const HomeScreen = () => {
             style={styles.cartContainer}
           >
             <Icon name="cart-outline" size={wp("6%")} color="#fff" />
-            {/* Add cart badge if needed */}
-            <View style={styles.cartBadge}></View>
+            {cartCount > 0 && (
+              <View style={styles.cartBadge}>
+                <Text style={styles.cartBadgeText}>{cartCount}</Text>
+              </View>
+            )}
           </TouchableOpacity>
         </View>
         {/* Search Bar - fixed */}
@@ -343,104 +359,112 @@ const HomeScreen = () => {
                 (item) => item.title === "PROMOTION" && item.place === "top"
               )
               .map((promo, index) => (
-                <View
-                  key={promo.id}
-                  style={{
-                    marginHorizontal: wp("4%"),
-                    marginVertical: hp("1%"),
-                    padding: wp("3%"),
-                    backgroundColor:
-                      promo.style === "style_1" ? "#f9fbfcff" : "#f6f7f7ff",
-                    borderRadius: wp("2%"),
-                  }}
-                >
-                  <FlatList
-                    data={promo.products}
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    keyExtractor={(item, idx) => idx.toString()}
-                    renderItem={({ item }) => (
-                      <TouchableOpacity
-                        onPress={() => {
-                          //console.log('Promotion item clicked:', { product: item });
-                          navigation.navigate("ProductDetails", {
-                            product: item,
-                          });
-                        }}
-                        activeOpacity={0.85}
-                      >
-                        <View
-                          style={{
-                            width: wp("40%"),
-                            marginRight: wp("3%"),
-                            backgroundColor: "#edececff",
-                            borderRadius: wp("2%"),
-                            overflow: "hidden",
-                            elevation: 2,
+                <View key={promo.id}>
+                  <Text style={styles.sectionTitle}>Promotion</Text>
+                  <View
+                    style={{
+                      marginHorizontal: wp("4%"),
+                      marginVertical: hp("1%"),
+                      padding: wp("3%"),
+                      backgroundColor:
+                        promo.style === "style_1" ? "#f9fbfcff" : "#f6f7f7ff",
+                      borderRadius: wp("2%"),
+                    }}
+                  >
+                    <FlatList
+                      data={promo.products}
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      keyExtractor={(item, idx) => idx.toString()}
+                      renderItem={({ item }) => (
+                        <TouchableOpacity
+                          onPress={() => {
+                            //console.log('Promotion item clicked:', { product: item });
+                            navigation.navigate("ProductDetails", {
+                              product: item,
+                            });
                           }}
+                          activeOpacity={0.85}
                         >
-                          <Image
-                            source={{ uri: item.image }}
-                            style={{
-                              width: "100%",
-                              height: hp("20%"),
-                              resizeMode: "cover",
-                            }}
-                          />
-                          <Text
-                            style={{ padding: wp("2%"), fontWeight: "500" }}
-                          >
-                            {item.name}
-                          </Text>
                           <View
                             style={{
-                              flexDirection: "row",
-                              alignItems: "center",
-                              paddingHorizontal: wp("2%"),
-                              marginBottom: hp("0.5%"),
+                              width: wp("40%"),
+                              marginRight: wp("3%"),
+                              backgroundColor: "#edececff",
+                              borderRadius: wp("2%"),
+                              overflow: "hidden",
+                              elevation: 2,
                             }}
                           >
-                            <Text
+                            <Image
+                              source={{ uri: item.image }}
                               style={{
-                                color: "#888",
-                                fontSize: wp("3%"),
-                                flex: 1,
-                              }}
-                            >
-                              1 Pc
-                            </Text>
-                            <Text
-                              style={{
-                                color: "green",
-                                fontWeight: "bold",
-                                fontSize: wp("3.5%"),
-                                textAlign: "right",
-                              }}
-                            >
-                              RM{item?.variants?.[0]?.product_price || ""}
-                            </Text>
-                          </View>
-                          <View style={{ margin: wp("2%") }}>
-                            <CartButton
-                              product={item}
-                              onChange={(quantity) => {
-                                console.log(
-                                  `Product ${item.name} quantity: ${quantity}`
-                                );
-                              }}
-                              showPromotion={true}
-                              onPromotionPress={() => {
-                                console.log(
-                                  `Promotion applied to ${item.name}`
-                                );
-                                // Add your promotion logic here
+                                width: "100%",
+                                height: hp("20%"),
+                                resizeMode: "cover",
                               }}
                             />
+                            <Text
+                              style={{ padding: wp("2%"), fontWeight: "500" }}
+                            >
+                              {item.name}
+                            </Text>
+                            <View
+                              style={{
+                                flexDirection: "row",
+                                alignItems: "center",
+                                paddingHorizontal: wp("2%"),
+                                marginBottom: hp("0.5%"),
+                              }}
+                            >
+                              <Text
+                                style={{
+                                  color: "#888",
+                                  fontSize: wp("3%"),
+                                  flex: 1,
+                                }}
+                              >
+                                1 Pc
+                              </Text>
+                              <Text
+                                style={{
+                                  color: "green",
+                                  fontWeight: "bold",
+                                  fontSize: wp("3.5%"),
+                                  textAlign: "right",
+                                }}
+                              >
+                                RM{item?.variants?.[0]?.product_price || ""}
+                              </Text>
+                            </View>
+                            <View
+                              style={{
+                                margin: wp("2%"),
+                                width: wp("36%"),
+                                height: hp("6%"),
+                              }}
+                            >
+                              <CartButton
+                                product={item}
+                                onChange={(quantity) => {
+                                  console.log(
+                                    `Product ${item.name} quantity: ${quantity}`
+                                  );
+                                }}
+                                showPromotion={true}
+                                onPromotionPress={() => {
+                                  console.log(
+                                    `Promotion applied to ${item.name}`
+                                  );
+                                  // Add your promotion logic here
+                                }}
+                              />
+                            </View>
                           </View>
-                        </View>
-                      </TouchableOpacity>
-                    )}
-                  />
+                        </TouchableOpacity>
+                      )}
+                    />
+                  </View>
                 </View>
               ))}
 
@@ -744,11 +768,12 @@ const styles = StyleSheet.create({
     top: -wp("1%"),
     right: -wp("1%"),
     backgroundColor: "#e60023",
-    borderRadius: wp("1%"),
-    width: wp("2.5%"),
-    height: wp("2.5%"),
+    borderRadius: wp("2%"),
+    minWidth: wp("4%"),
+    height: wp("4%"),
     justifyContent: "center",
     alignItems: "center",
+    paddingHorizontal: wp("0.5%"),
   },
   cartBadgeText: {
     color: "#fff",

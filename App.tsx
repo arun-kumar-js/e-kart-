@@ -31,6 +31,8 @@ import Notifications from "./src/Screens/SideDrawer/Notification";
 import ShareApp from "./src/Screens/SideDrawer/ShareApp";
 import TrackOrder from "./src/Screens/SideDrawer/TrackOrder";
 import TrackOrderDetails from "./src/Screens/SideDrawer/TrackOrderDetails";
+import Profile from "./src/Screens/Profile";
+import EditProfile from "./src/Screens/EditProfile";
 import FontTest from "./src/components/FontTest";
 
 const Stack = createNativeStackNavigator();
@@ -65,12 +67,7 @@ const App = () => {
         <Stack.Screen
           name="AddressPage"
           component={AddressPage}
-          options={{
-            headerShown: true,
-            title: "Choose Address",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+        
         />
         <Stack.Screen name="AddAddress" component={AddAddress} />
         <Stack.Screen name="SubCategory" component={SubCategory} />
@@ -79,6 +76,14 @@ const App = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="OtpScreen" component={OtpScreen} />
         <Stack.Screen name="Cart" component={Cart} />
+        <Stack.Screen name="Profile" component={Profile} />
+        <Stack.Screen
+          name="EditProfile"
+          component={EditProfile}
+          options={{
+            headerShown: false,
+          }}
+        />
         <Stack.Screen name="Checkout" component={CheckoutScreen} />
 
         <Stack.Screen
@@ -102,62 +107,34 @@ const App = () => {
           name="About"
           component={About}
           options={{
-            headerShown: true,
-            title: "About",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
+        
           }}
         />
         <Stack.Screen
           name="Contact"
           component={Contact}
-          options={{
-            headerShown: true,
-            title: "Contact",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+          
         />
         <Stack.Screen
           name="FAQ"
           component={Faq}
-          options={{
-            headerShown: true,
-            title: "FAQ",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+         
         />
         <Stack.Screen
           name="Notifications"
           component={Notifications}
-          options={{
-            headerShown: true,
-            title: "Notifications",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+        
         />
 
         <Stack.Screen
           name="TermsAndConditions"
           component={TermsAndConditions}
-          options={{
-            headerShown: true,
-            title: "Terms and Conditions",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+       
         />
         <Stack.Screen
           name="PrivacyPolicy"
           component={PrivacyPolicy}
-          options={{
-            headerShown: true,
-            title: "Privacy Policy",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+        
         />
         <Stack.Screen
           name="ShareApp"
@@ -172,12 +149,7 @@ const App = () => {
         <Stack.Screen
           name="TrackOrder"
           component={TrackOrder}
-          options={{
-            headerShown: true,
-            title: "Track Order",
-            headerStyle: { backgroundColor: "red" },
-            headerTintColor: "white",
-          }}
+         
         />
         <Stack.Screen
           name="TrackOrderDetails"

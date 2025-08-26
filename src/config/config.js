@@ -17,3 +17,4 @@ export const FAQ = `https://spiderekart.com/india_demo_new/pages_web/faq.php`;
 export const NOTIFICATION = `${API_BASE_URL}sections.php`;
 export const TRACK_OREDER = `${API_BASE_URL}order-process.php`;
 export const SEARCH_PRODUCTS = `${API_BASE_URL}products-search.php`;
+export const DELETE_USER = `${API_BASE_URL}delete_account.php`;
